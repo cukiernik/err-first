@@ -1,0 +1,7 @@
+Source: err-first
+Priority: optional
+Maintainer: commiter<45200663+cukiernik@users.noreply.github.com>
+Package: err-first
+Architecture: amd64
+Version: 0.0
+Description: Break stdout after first stderr
