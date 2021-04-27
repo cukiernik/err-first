@@ -1,15 +1,27 @@
 
-.PHONY:	Makefile
+GET_ID=while IFS== read N V ; do case \$$N in ID) echo \$$V ;; esac ; done </etc/os-release
+
+.PHONY: Makefile
+
+Makefile: $(shell bash -c "${GET_ID}")
+
+all: err-first
 
 err-first: err-first.cpp
-	gcc -g -o $@ $<
+	gcc -o $@ $<
 
-all:	err-first
+err-first-0/usr/bin/%: %
+	mkdir -p $(dir $@)
+	ln -f $< $@
+	chmod 755 $@
 
-Debian: err-first
+%.deb: %/usr/bin/err-first
+	dpkg-deb --root-owner-group --build $*
 
-Ununtu:	Debian
+Debian: err-first-0.deb
 
-Makefile:
-	while IFS== read N V; do case "$N" in ID)make $N;; esac ; done </etc/os-release
-	
+ubuntu:	Debian
+
+
+
+

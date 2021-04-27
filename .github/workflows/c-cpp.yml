@@ -1,0 +1,20 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: make
+      run: make
+
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v2
+      with:
+        name: err-first-0.deb
+        path: err-first-0.deb
+        retention-days: 14
