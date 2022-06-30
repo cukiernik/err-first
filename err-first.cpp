@@ -4,8 +4,8 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <signal.h>
-#define ERR( t) write( 2, t,sizeof( t)- 1)
-#define OUT( t) write( 1, t,sizeof( t)- 1)
+#define ERR( t) write( STDERR_FILENO, t,sizeof( t)- 1)
+#define OUT( t) write( STDOUT_FILENO, t,sizeof( t)- 1)
 
 typedef unsigned char error;
 
@@ -19,7 +19,7 @@ static int copy(pollfd& in,int out) {
 
 
 static int reader2(void*)                           {
-    close( 0);
+    close( STDIN_FILENO);
     close( Out[ 1]);
     close( Err[ 1]);
     fcntl( Out[ 0], F_SETFL, O_NONBLOCK);
@@ -30,12 +30,12 @@ static int reader2(void*)                           {
         error E= poll( Fds, count, -1);
         if( E<= 0)return -E;
         if( POLLIN& Fds[ 1].revents) {
-            copy( Fds[ 1], 1);
+            copy( Fds[ 1], STDOUT_FILENO);
             return 0;                }
         else if( POLLHUP& Fds[ 1].revents) {
             close( Fds[ 1].fd); count= 1;  }
-        if( POLLIN& Fds[ 0].revents) {
-            copy( Fds[ 0], 2);	     }
+        if( POLLIN& Fds[ 0].revents)       {
+            copy( Fds[ 0], STDERR_FILENO); }
         else if( POLLHUP& Fds[ 0].revents)      {
             close( Fds[ 0].fd); Fds[ 0].fd= -1; } } }
 
@@ -44,8 +44,8 @@ int main(int,char** Param)               {
     pipe( Out); pipe( Err);
     static char Stack[ 0x8000];
     clone( reader2, Stack+ sizeof( Stack), 0, 0);
-    dup2( Out[ 1], 1);
-    dup2( Err[ 1], 2);
+    dup2( Out[ 1], STDOUT_FILENO);
+    dup2( Err[ 1], STDERR_FILENO);
     close( Out[ 0]);
     close( Out[ 1]);
     close( Err[ 0]);
